@@ -6,11 +6,15 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Stethoscope, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -23,29 +27,16 @@ const Login: React.FC = () => {
     setError('');
 
     try {
-      // TODO: Implement actual authentication with Supabase
-      // For demo purposes, we'll simulate authentication
-      if (formData.username === 'admin' && formData.password === 'admin') {
-        // Simulate successful login
-        localStorage.setItem('user', JSON.stringify({
-          id: '1',
-          username: 'admin',
-          name: 'Dr. Admin',
-          email: 'admin@health.gov',
-          role: 'admin',
-        }));
-        navigate('/dashboard');
-      } else if (formData.username === 'staff' && formData.password === 'staff') {
-        localStorage.setItem('user', JSON.stringify({
-          id: '2',
-          username: 'staff',
-          name: 'Dr. Staff',
-          email: 'staff@health.gov',
-          role: 'staff',
-        }));
-        navigate('/dashboard');
+      const { error } = await signIn(formData.email, formData.password);
+      
+      if (error) {
+        setError(error);
       } else {
-        setError('Invalid username or password');
+        toast({
+          title: "Login successful",
+          description: "Welcome back to the surveillance system",
+        });
+        navigate('/dashboard');
       }
     } catch (err) {
       setError('Login failed. Please try again.');
@@ -89,14 +80,14 @@ const Login: React.FC = () => {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  value={formData.username}
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="Enter your username"
+                  placeholder="Enter your email"
                   required
                 />
               </div>
@@ -156,12 +147,12 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-            {/* Demo credentials */}
+            {/* Demo info */}
             <div className="mt-6 p-4 bg-muted rounded-lg">
-              <h4 className="text-sm font-medium text-foreground mb-2">Demo Credentials:</h4>
+              <h4 className="text-sm font-medium text-foreground mb-2">First time here?</h4>
               <div className="text-xs text-muted-foreground space-y-1">
-                <p><strong>Admin:</strong> username: admin, password: admin</p>
-                <p><strong>Staff:</strong> username: staff, password: staff</p>
+                <p>Create an account or contact your administrator for access.</p>
+                <p>All new accounts require admin approval for security.</p>
               </div>
             </div>
           </CardContent>

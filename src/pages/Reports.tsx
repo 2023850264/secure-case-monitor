@@ -123,7 +123,7 @@ Leptospirosis,2024-01-14,North Region,Positive,88%,Dr. Garcia`;
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation user={mockUser} />
+      <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">

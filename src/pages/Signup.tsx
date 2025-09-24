@@ -7,9 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Stethoscope, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     fullName: '',
     username: '',
@@ -43,16 +47,26 @@ const Signup: React.FC = () => {
     }
 
     try {
-      // TODO: Implement actual registration with Supabase
-      // For demo purposes, we'll simulate registration
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+      const { error } = await signUp(formData.email, formData.password, {
+        username: formData.username,
+        full_name: formData.fullName,
+        region: formData.region
+      });
       
-      setSuccess(true);
-      
-      // Redirect after 3 seconds
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000);
+      if (error) {
+        setError(error);
+      } else {
+        setSuccess(true);
+        toast({
+          title: "Registration submitted",
+          description: "Check your email to verify your account",
+        });
+        
+        // Redirect after 3 seconds
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      }
     } catch (err) {
       setError('Registration failed. Please try again.');
     } finally {
@@ -82,7 +96,7 @@ const Signup: React.FC = () => {
             <CheckCircle className="w-16 h-16 text-success mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-foreground mb-2">Registration Submitted!</h2>
             <p className="text-muted-foreground mb-4">
-              Your account request has been submitted for admin approval. You will receive an email once your account is activated.
+              Please check your email to verify your account. Your account will be activated once verified and approved by an administrator.
             </p>
             <p className="text-sm text-muted-foreground">
               Redirecting to login page...

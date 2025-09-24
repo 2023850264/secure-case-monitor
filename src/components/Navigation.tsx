@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -15,27 +15,28 @@ import {
   FileText, 
   LogOut, 
   Menu,
-  X
+  X,
+  Shield
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
-interface NavigationProps {
-  user?: {
-    id: string;
-    name: string;
-    email: string;
-    role: 'admin' | 'staff';
-    avatar?: string;
-  } | null;
-}
-
-const Navigation: React.FC<NavigationProps> = ({ user }) => {
+const Navigation: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
 
-  const handleLogout = () => {
-    // TODO: Implement logout logic
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged out successfully",
+        description: "Thank you for using the surveillance system",
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const navItems = [
@@ -102,20 +103,23 @@ const Navigation: React.FC<NavigationProps> = ({ user }) => {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.avatar} alt={user.name} />
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                          {user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
+                       <Avatar className="h-10 w-10">
+                         <AvatarImage src={user.profile_pic || undefined} alt={user.full_name || user.username} />
+                         <AvatarFallback className="bg-primary text-primary-foreground">
+                           {user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || user.username?.slice(0, 2).toUpperCase() || 'U'}
+                         </AvatarFallback>
+                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end">
-                    <div className="px-2 py-1.5 text-sm">
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-muted-foreground">{user.email}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
-                    </div>
+                     <div className="px-2 py-1.5 text-sm">
+                       <p className="font-medium">{user.full_name || user.username}</p>
+                       <p className="text-muted-foreground">{user.email}</p>
+                       <div className="flex items-center text-xs text-muted-foreground">
+                         <Shield className="mr-1 h-3 w-3" />
+                         <span className="capitalize">{user.role}</span>
+                       </div>
+                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link to="/profile" className="cursor-pointer">
