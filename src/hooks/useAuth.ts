@@ -62,6 +62,8 @@ export function useAuthProvider() {
 
       if (error) throw error
       setUser(data)
+      // Save user to localStorage for dashboard access
+      localStorage.setItem('user', JSON.stringify(data))
     } catch (error) {
       console.error('Error fetching user profile:', error)
     } finally {
@@ -71,17 +73,31 @@ export function useAuthProvider() {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) return { error: error.message }
+
+      // Fetch user profile to check status
+      const { data: userProfile, error: profileError } = await supabase
+        .from('users')
+        .select('status')
+        .eq('id', data?.user?.id)
+        .single()
+
+      if (profileError) return { error: profileError.message }
+
+      if (userProfile?.status !== 'active') {
+        await supabase.auth.signOut()
+        return { error: 'Account not approved by admin yet.' }
+      }
       
       // Log audit event
-      if (session?.user) {
+      if (data?.user) {
         await supabase.rpc('log_audit_event', {
-          p_user_id: session.user.id,
+          p_user_id: data.user.id,
           p_action: 'user_login',
           p_details: `User logged in from IP: ${window.location.hostname}`
         })
@@ -119,6 +135,8 @@ export function useAuthProvider() {
       })
     }
     await supabase.auth.signOut()
+    // Clear user from localStorage on logout
+    localStorage.removeItem('user')
   }
 
   const updateProfile = async (updates: Partial<User>) => {
