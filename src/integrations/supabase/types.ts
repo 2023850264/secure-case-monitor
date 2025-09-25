@@ -96,6 +96,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      is_admin: {
+        Args: { user_id?: string }
+        Returns: boolean
+      }
       log_audit_event: {
         Args: { p_action: string; p_details?: string; p_user_id: string }
         Returns: undefined
