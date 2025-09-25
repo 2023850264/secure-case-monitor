@@ -21,6 +21,7 @@ const Signup: React.FC = () => {
     password: '',
     confirmPassword: '',
     region: '',
+    role: 'staff',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -50,7 +51,8 @@ const Signup: React.FC = () => {
       const { error } = await signUp(formData.email, formData.password, {
         username: formData.username,
         full_name: formData.fullName,
-        region: formData.region
+        region: formData.region,
+        role: formData.role
       });
       
       if (error) {
@@ -85,6 +87,13 @@ const Signup: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       region: value
+    }));
+  };
+
+  const handleRoleChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      role: value
     }));
   };
 
@@ -185,6 +194,19 @@ const Signup: React.FC = () => {
                     <SelectItem value="east">East Region</SelectItem>
                     <SelectItem value="west">West Region</SelectItem>
                     <SelectItem value="central">Central Region</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="role">Role</Label>
+                <Select value={formData.role} onValueChange={handleRoleChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="staff">Staff</SelectItem>
+                    <SelectItem value="admin">Administrator</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

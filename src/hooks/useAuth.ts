@@ -7,7 +7,7 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error?: string }>
-  signUp: (email: string, password: string, metadata: { username: string, full_name: string, region?: string }) => Promise<{ error?: string }>
+  signUp: (email: string, password: string, metadata: { username: string, full_name: string, region?: string, role?: string }) => Promise<{ error?: string }>
   signOut: () => Promise<void>
   updateProfile: (updates: Partial<User>) => Promise<{ error?: string }>
 }
@@ -93,7 +93,7 @@ export function useAuthProvider() {
     }
   }
 
-  const signUp = async (email: string, password: string, metadata: { username: string, full_name: string, region?: string }) => {
+  const signUp = async (email: string, password: string, metadata: { username: string, full_name: string, region?: string, role?: string }) => {
     try {
       const { error } = await supabase.auth.signUp({
         email,
